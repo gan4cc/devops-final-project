@@ -1,7 +1,7 @@
 image:
-  repository: devops-backend
+  repository: ghcr.io/gan4cc/devops-final-project/backend
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
