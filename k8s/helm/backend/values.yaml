@@ -1,0 +1,10 @@
+image:
+  repository: devops-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+replicaCount: 1
