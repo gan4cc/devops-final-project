@@ -1,7 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from app.health import router as health_router
 from google.cloud import storage
-from collections import defaultdict
 import os
 
 # =========================
@@ -34,44 +33,8 @@ app.include_router(health_router)
 
 @app.get("/")
 def root():
-    return {
-        "message": "Backend is running"
-    }
-# =========================
-# List files and folders
-# =========================
+    return {"message": "Backend is running"}
 
-@app.get("/files")
-def list_files(prefix: str = ""):
-    """
-    Возвращает список файлов и папок в bucket
-    """
-    try:
-        blobs = bucket.list_blobs(prefix=prefix)
-
-        folders = set()
-        files = []
-
-        for blob in blobs:
-            name = blob.name
-
-            # логические папки
-            if "/" in name:
-                folder = name.split("/")[0] + "/"
-                folders.add(folder)
-
-            # реальные файлы
-            if not name.endswith("/"):
-                files.append(name)
-
-        return {
-            "prefix": prefix,
-            "folders": sorted(list(folders)),
-            "files": sorted(files)
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 # =========================
 # Upload file
 # =========================
@@ -82,10 +45,9 @@ UPLOAD_FOLDER = "uploads"
 async def upload_file(file: UploadFile = File(...)):
     try:
         contents = await file.read()
+        path = f"{UPLOAD_FOLDER}/{file.filename}"
 
-        blob_path = f"{UPLOAD_FOLDER}/{file.filename}"
-        blob = bucket.blob(blob_path)
-
+        blob = bucket.blob(path)
         blob.upload_from_string(
             contents,
             content_type=file.content_type
@@ -93,9 +55,42 @@ async def upload_file(file: UploadFile = File(...)):
 
         return {
             "filename": file.filename,
-            "path": blob_path,
+            "path": path,
             "bucket": bucket.name,
             "status": "uploaded"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =========================
+# List files and folders
+# =========================
+
+@app.get("/files")
+def list_files(prefix: str = ""):
+    """
+    Возвращает список файлов и папок
+    """
+    try:
+        blobs = bucket.list_blobs(prefix=prefix)
+
+        folders = set()
+        files = []
+
+        for blob in blobs:
+            name = blob.name
+
+            if "/" in name:
+                folders.add(name.split("/")[0] + "/")
+
+            if not name.endswith("/"):
+                files.append(name)
+
+        return {
+            "prefix": prefix,
+            "folders": sorted(folders),
+            "files": sorted(files)
         }
 
     except Exception as e:
@@ -108,7 +103,7 @@ async def upload_file(file: UploadFile = File(...)):
 @app.post("/folders")
 def create_folder(folder: str = Body(..., embed=True)):
     """
-    Создаёт логическую папку в GCS
+    Создаёт логическую папку (placeholder)
     """
     try:
         if not folder.endswith("/"):
@@ -173,6 +168,41 @@ def delete_folder(folder: str):
         return {
             "folder": folder,
             "deleted_files": deleted
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =========================
+# Move file
+# =========================
+
+@app.post("/files/move")
+def move_file(
+    source: str = Body(..., embed=True),
+    destination: str = Body(..., embed=True)
+):
+    """
+    Перемещает файл (copy + delete)
+    """
+    try:
+        source_blob = bucket.blob(source)
+
+        if not source_blob.exists():
+            raise HTTPException(status_code=404, detail="Source file not found")
+
+        bucket.copy_blob(
+            source_blob,
+            bucket,
+            destination
+        )
+
+        source_blob.delete()
+
+        return {
+            "from": source,
+            "to": destination,
+            "status": "moved"
         }
 
     except Exception as e:
