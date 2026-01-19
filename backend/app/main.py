@@ -24,7 +24,8 @@ def root():
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     blob = bucket.blob(file.filename)
-    blob.upload_from_file(file.file)
+    contents = await file.read()
+    blob.upload_from_string(contents, content_type=file.content_type)
     return {
         "filename": file.filename,
         "bucket": bucket.name
