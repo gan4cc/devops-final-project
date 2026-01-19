@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from app.health import router as health_router
 from google.cloud import storage
+from typing import Optional
 import os
 
 # =========================
@@ -36,34 +37,6 @@ def root():
     return {"message": "Backend is running"}
 
 # =========================
-# Upload file
-# =========================
-
-UPLOAD_FOLDER = "uploads"
-
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-    try:
-        contents = await file.read()
-        path = f"{UPLOAD_FOLDER}/{file.filename}"
-
-        blob = bucket.blob(path)
-        blob.upload_from_string(
-            contents,
-            content_type=file.content_type
-        )
-
-        return {
-            "filename": file.filename,
-            "path": path,
-            "bucket": bucket.name,
-            "status": "uploaded"
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# =========================
 # List files and folders
 # =========================
 
@@ -95,7 +68,45 @@ def list_files(prefix: str = ""):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+# =========================
+# Upload file
+# =========================
 
+UPLOAD_FOLDER = "uploads"
+
+@app.post("/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    folder: Optional[str] = None
+):
+    """
+    Загружает файл в указанную папку или в uploads/ по умолчанию
+    """
+    try:
+        contents = await file.read()
+
+        # если папка не указана — используем uploads
+        if folder:
+            folder = folder.rstrip("/")
+            path = f"{folder}/{file.filename}"
+        else:
+            path = f"{UPLOAD_FOLDER}/{file.filename}"
+
+        blob = bucket.blob(path)
+        blob.upload_from_string(
+            contents,
+            content_type=file.content_type
+        )
+
+        return {
+            "filename": file.filename,
+            "path": path,
+            "bucket": bucket.name,
+            "status": "uploaded"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 # =========================
 # Create folder
 # =========================
