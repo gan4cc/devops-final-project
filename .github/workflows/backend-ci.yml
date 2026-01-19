@@ -58,8 +58,8 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-            workload_identity_provider: "projects/563486470074/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
-            service_account: "github-ci@project-bd5be697-574d-46e6-9b8.iam.gserviceaccount.com"
+          workload_identity_provider: "projects/563486470074/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service_account: "github-ci@project-bd5be697-574d-46e6-9b8.iam.gserviceaccount.com"
 
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
@@ -68,9 +68,10 @@ jobs:
         run: |
           gcloud container clusters get-credentials devops-final-gke \
             --region us-central1 \
-            --project PROJECT_ID  
+            --project project-bd5be697-574d-46e6-9b8  
 
       - name: Deploy to Kubernetes
-        if: ${{ github.event.inputs.deploy != 'false' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy != 'false' || github.event_name == 'push' }}
+
         run: |
           helm upgrade --install backend ./k8s/helm/backend
