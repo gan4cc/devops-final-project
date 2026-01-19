@@ -30,3 +30,19 @@ spec:
               port: 8000
             initialDelaySeconds: 10
             periodSeconds: 20
+            
+          env:
+          - name: APP_ENV
+            valueFrom:
+              secretKeyRef:
+                name: backend-secrets
+                key: APP_ENV
+
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: backend-secrets
+                key: SECRET_KEY
+                
+          - name: GCS_BUCKET
+            value: devops-final-project-uploads 

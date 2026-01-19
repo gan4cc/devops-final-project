@@ -1,5 +1,11 @@
 from fastapi import FastAPI
 from app.health import router as health_router
+from google.cloud import storage
+import os
+from fastapi import UploadFile, File
+
+client = storage.Client()  # ← ищет ADC автоматически
+bucket = client.bucket(os.getenv("GCS_BUCKET"))
 
 app = FastAPI(
     title="DevOps Final Project API",
@@ -14,4 +20,12 @@ app.include_router(health_router)
 def root():
     return {
         "message": "Backend is running"
+    }
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    blob = bucket.blob(file.filename)
+    blob.upload_from_file(file.file)
+    return {
+        "filename": file.filename,
+        "bucket": bucket.name
     }
