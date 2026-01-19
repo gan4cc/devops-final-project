@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from app.health import router as health_router
 from google.cloud import storage
+from collections import defaultdict
 import os
 
 # =========================
@@ -36,7 +37,41 @@ def root():
     return {
         "message": "Backend is running"
     }
+# =========================
+# List files and folders
+# =========================
 
+@app.get("/files")
+def list_files(prefix: str = ""):
+    """
+    Возвращает список файлов и папок в bucket
+    """
+    try:
+        blobs = bucket.list_blobs(prefix=prefix)
+
+        folders = set()
+        files = []
+
+        for blob in blobs:
+            name = blob.name
+
+            # логические папки
+            if "/" in name:
+                folder = name.split("/")[0] + "/"
+                folders.add(folder)
+
+            # реальные файлы
+            if not name.endswith("/"):
+                files.append(name)
+
+        return {
+            "prefix": prefix,
+            "folders": sorted(list(folders)),
+            "files": sorted(files)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 # =========================
 # Upload file
 # =========================
