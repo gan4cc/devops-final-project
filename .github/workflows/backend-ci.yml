@@ -54,10 +54,19 @@ jobs:
         with:
           version: v3.14.0
 
-      - name: Configure kubeconfig
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get GKE credentials
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_DATA }}" > ~/.kube/config
+          gcloud container clusters get-credentials devops-final-gke \
+            --region us-central1 \
+            --project PROJECT_ID  
 
       - name: Deploy to Kubernetes
         if: ${{ github.event.inputs.deploy != 'false' }}
