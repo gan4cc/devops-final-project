@@ -7,6 +7,13 @@ on:
     paths:
       - "backend/**"
 
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy backend to Kubernetes"
+        required: true
+        default: "true"
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -36,7 +43,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}/backend:latest
-            
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
         with:
@@ -53,6 +60,6 @@ jobs:
           echo "${{ secrets.KUBECONFIG_DATA }}" > ~/.kube/config
 
       - name: Deploy to Kubernetes
+        if: ${{ github.event.inputs.deploy != 'false' }}
         run: |
           helm upgrade --install backend ./k8s/helm/backend
-
