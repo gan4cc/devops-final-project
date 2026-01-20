@@ -25,4 +25,3 @@ GitHub Actions -> Docker Image -> GHCR
 
 CD:
 Helm -> Kubernetes
-```

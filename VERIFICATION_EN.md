@@ -18,4 +18,15 @@ http://localhost:8000/docs
 
 4. Verify monitoring
 - Open Grafana
-- Check Kubernetes dashboards
+- kubectl port-forward svc/monitoring-grafana \
+  -n monitoring 3000:80
+login: admin
+Password:
+kubectl get secret monitoring-grafana -n monitoring \
+  -o jsonpath="{.data.admin-password}" | base64 --decode
+
+- Check Kubernetes dashboards:
+  Kubernetes / Compute Resources / Pod
+  Kubernetes / Compute Resources / Node (Pods)
+  Kubernetes / Networking / Pod
+etc.
