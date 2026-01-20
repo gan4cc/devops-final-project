@@ -31,7 +31,7 @@
 •	gcloud container clusters get-credentials devops-final-gke --region us-central1 --project PROJECT_ID
 •	kubectl get nodes
 
-##Docker
+## Docker
 •	docker login ghcr.io -u gan4cc
 •	docker build -t ghcr.io/gan4cc/devops-final-project/backend:latest backend
 •	docker push ghcr.io/gan4cc/devops-final-project/backend:latest
