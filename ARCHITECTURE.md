@@ -11,6 +11,7 @@ Frontend → Backend → Cloud Storage.
 - Backend: Stateless FastAPI service running in Kubernetes Pods
 - Data Storage: Google Cloud Storage (GCS)
 - The backend service is built with FastAPI and follows a modular Python application structure (backend/app)
+Folders are implemented as logical prefixes in object storage.
 
 ---
 

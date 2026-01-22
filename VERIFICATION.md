@@ -14,9 +14,14 @@ http://localhost:8000/health
 3. Open Swagger UI
 ```
 http://localhost:8000/docs
+- Verify file upload to a specific folder
+- Verify listing files and folders
+- Verify file deletion
+- Verify moving files between folders
 ```
 
 4. Verify monitoring
+```
 - Open Grafana 
 - kubectl port-forward svc/monitoring-grafana \-n monitoring 3000:80
 login: admin
