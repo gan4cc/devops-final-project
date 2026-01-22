@@ -4,17 +4,19 @@ from google.cloud import storage
 from typing import Optional
 import os
 
+
 # =========================
 # Google Cloud Storage init
 # =========================
 
-client = storage.Client()  # Использует ADC (Workload Identity / gcloud)
+client = storage.Client()  # Uses ADC (Workload Identity / gcloud)
 bucket_name = os.getenv("GCS_BUCKET")
 
 if not bucket_name:
-    raise RuntimeError("GCS_BUCKET env variable is not set")
+    raise RuntimeError("GCS_BUCKET environment variable is not set")
 
 bucket = client.bucket(bucket_name)
+
 
 # =========================
 # FastAPI app
@@ -22,19 +24,21 @@ bucket = client.bucket(bucket_name)
 
 app = FastAPI(
     title="DevOps Final Project API",
-    version="0.1.0"
+    version="0.1.0",
 )
 
 # Health check
 app.include_router(health_router)
 
+
 # =========================
-# Root
+# Root endpoint
 # =========================
 
 @app.get("/")
 def root():
     return {"message": "Backend is running"}
+
 
 # =========================
 # List files and folders
@@ -43,7 +47,7 @@ def root():
 @app.get("/files")
 def list_files(prefix: str = ""):
     """
-    Возвращает список файлов и папок
+    Returns a list of files and folders in the bucket
     """
     try:
         blobs = bucket.list_blobs(prefix=prefix)
@@ -63,29 +67,31 @@ def list_files(prefix: str = ""):
         return {
             "prefix": prefix,
             "folders": sorted(folders),
-            "files": sorted(files)
+            "files": sorted(files),
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
 # =========================
 # Upload file
 # =========================
 
 UPLOAD_FOLDER = "uploads"
 
+
 @app.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
-    folder: Optional[str] = None
+    folder: Optional[str] = None,
 ):
     """
-    Загружает файл в указанную папку или в uploads/ по умолчанию
+    Uploads a file to the specified folder or to uploads/ by default
     """
     try:
         contents = await file.read()
 
-        # если папка не указана — используем uploads
         if folder:
             folder = folder.rstrip("/")
             path = f"{folder}/{file.filename}"
@@ -95,18 +101,20 @@ async def upload_file(
         blob = bucket.blob(path)
         blob.upload_from_string(
             contents,
-            content_type=file.content_type
+            content_type=file.content_type,
         )
 
         return {
             "filename": file.filename,
             "path": path,
             "bucket": bucket.name,
-            "status": "uploaded"
+            "status": "uploaded",
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
 # =========================
 # Create folder
 # =========================
@@ -114,7 +122,7 @@ async def upload_file(
 @app.post("/folders")
 def create_folder(folder: str = Body(..., embed=True)):
     """
-    Создаёт логическую папку (placeholder)
+    Creates a logical folder (placeholder object)
     """
     try:
         if not folder.endswith("/"):
@@ -125,11 +133,12 @@ def create_folder(folder: str = Body(..., embed=True)):
 
         return {
             "folder": folder,
-            "status": "created"
+            "status": "created",
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 
 # =========================
 # Delete file
@@ -138,7 +147,7 @@ def create_folder(folder: str = Body(..., embed=True)):
 @app.delete("/files")
 def delete_file(path: str):
     """
-    Удаляет файл по полному пути
+    Deletes a file by its full path
     """
     try:
         blob = bucket.blob(path)
@@ -150,11 +159,12 @@ def delete_file(path: str):
 
         return {
             "file": path,
-            "status": "deleted"
+            "status": "deleted",
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 
 # =========================
 # Delete folder
@@ -163,7 +173,7 @@ def delete_file(path: str):
 @app.delete("/folders")
 def delete_folder(folder: str):
     """
-    Удаляет папку (все файлы с этим префиксом)
+    Deletes a folder and all objects with the given prefix
     """
     try:
         if not folder.endswith("/"):
@@ -178,11 +188,12 @@ def delete_folder(folder: str):
 
         return {
             "folder": folder,
-            "deleted_files": deleted
+            "deleted_files": deleted,
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 
 # =========================
 # Move file
@@ -191,21 +202,24 @@ def delete_folder(folder: str):
 @app.post("/files/move")
 def move_file(
     source: str = Body(..., embed=True),
-    destination: str = Body(..., embed=True)
+    destination: str = Body(..., embed=True),
 ):
     """
-    Перемещает файл (copy + delete)
+    Moves a file (copy + delete)
     """
     try:
         source_blob = bucket.blob(source)
 
         if not source_blob.exists():
-            raise HTTPException(status_code=404, detail="Source file not found")
+            raise HTTPException(
+                status_code=404,
+                detail="Source file not found",
+            )
 
         bucket.copy_blob(
             source_blob,
             bucket,
-            destination
+            destination,
         )
 
         source_blob.delete()
@@ -213,8 +227,8 @@ def move_file(
         return {
             "from": source,
             "to": destination,
-            "status": "moved"
+            "status": "moved",
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
