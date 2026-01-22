@@ -1,3 +1,3 @@
-project_id  = "project-bd5be697-574d-46e6-9b8"
-bucket_name = "devops-final-project-uploads-bd5be"
+project_id  = "gan4-devops-final-project"
+bucket_name = "terraform-state-devops-final"
 region      = "us-central1"
