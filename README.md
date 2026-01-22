@@ -51,11 +51,18 @@ The project is built using **open-source and cloud technologies** and closely fo
 
 CI is fully automated using **GitHub Actions**.
 
-Pipeline:
+Before building and deploying the application, the pipeline performs the following validation steps:
+
+- Python code linting using flake8
+- Dependency validation during depenci installation
+- Dockerfile best practices check Hadolint
+- Container vulnerability scanning using Trivy (non-blocking, informational)
+
+After successful validation, the pipeline:
 - automatically runs on `push` to the `main` branch
-- triggered **only when backend files change**
-- builds a Docker image
-- publishes the image to GHCR
+- is triggered only when backend-related files change
+- builds a Docker image for the backend service
+- publishes the image to GitHub Container Registry (GHCR)
 
 Manual pipeline execution is also supported via `workflow_dispatch`.
 
@@ -66,9 +73,10 @@ Manual pipeline execution is also supported via `workflow_dispatch`.
 The project uses **controlled (manual) Continuous Delivery**.
 
 - deployment is done using **Helm**
+- the application is deployed to Kubernetes
 - Kubernetes performs rolling updates
-- application health is monitored via health checks
-- rollback is possible using Kubernetes tools
+- application health is monitored using liveness and readiness probes
+- rollback is supported through Kubernetes and Helm mechanisms
 
 Automatic deployment from GitHub Actions is **intentionally not enabled**
 due to cloud security limitations and to maintain release control.
@@ -106,12 +114,46 @@ Infrastructure is managed using **Terraform**:
 
 ## 📁 Project Structure
 
-```
-backend/
-k8s/helm/backend/
-.github/workflows/
-terraform/
-```
+DEVOPS_FINAL_PROJECT/
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── health.py
+│   │   └── ...
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── k8s/
+│   └── helm/
+│       └── backend/
+│
+├── infra/
+│   └── terraform/
+│       ├── main.tf
+│       ├── gke.tf
+│       ├── iam.tf
+│       ├── ksa.tf
+│       ├── variables.tf
+│       ├── terraform.tfvars
+│       └── outputs.tf
+│
+├── docs/
+│   ├── pictures/
+│   │   ├── architecture.png
+│   │   ├── cicd.png
+│   │   └── monitoring.png
+│   └── diagrams.md (опционально)
+│
+├── .github/
+│   └── workflows/
+│       └── backend-ci.yml
+│
+├── ARCHITECTURE.md
+├── DEPLOYMENT+RUNBOOK.md
+├── VERIFICATION.md
+├── README.md
+├── .gitignore
+└── LICENSE.txt
 
 ---
 

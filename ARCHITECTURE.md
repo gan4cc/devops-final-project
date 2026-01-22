@@ -10,12 +10,15 @@ Frontend → Backend → Cloud Storage.
 - Frontend: Swagger UI
 - Backend: Stateless FastAPI service running in Kubernetes Pods
 - Data Storage: Google Cloud Storage (GCS)
+- The backend service is built with FastAPI and follows a modular Python application structure (backend/app)
 
 ---
 
 ## CI/CD Pipeline
 
 ![CI/CD Pipeline](docs/images/2.png)
+
+The CI pipeline includes a pre-build validation stage to ensure code quality and container best practices.
 
 CI/CD is implemented using GitHub Actions:
 - Build Docker image

@@ -15,7 +15,36 @@ on:
         default: "true"
 
 jobs:
+  lint-and-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install flake8
+
+      - name: Python lint (flake8)
+        run: |
+          cd backend
+          flake8 app --max-line-length=100
+
+      - name: Dockerfile lint (Hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: backend/Dockerfile
+
   build-and-push:
+    needs: lint-and-check
     runs-on: ubuntu-latest
 
     permissions:
@@ -42,8 +71,14 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: |
-            ghcr.io/${{ github.repository }}/backend:latest
+          tags: ghcr.io/${{ github.repository }}/backend:latest
+
+      - name: Security scan (Trivy)
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/backend:latest
+          format: table
+          exit-code: 0
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
@@ -60,9 +95,6 @@ jobs:
         with:
           workload_identity_provider: "projects/563486470074/locations/global/workloadIdentityPools/github-pool/providers/github-provider-v2"
           service_account: "github-ci@project-bd5be697-574d-46e6-9b8.iam.gserviceaccount.com"
-
-      - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v2
 
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v2
