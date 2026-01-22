@@ -1,6 +1,6 @@
 provider "google" {
-  project = "project-bd5be697-574d-46e6-9b8"
-  region  = var.region
+  project = "charismatic-sum-485115-k9"
+  region  = "us-central1"
 }
 provider "kubernetes" {
   host  = "https://${google_container_cluster.primary.endpoint}"
