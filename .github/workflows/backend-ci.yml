@@ -93,15 +93,15 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: projects/381783402939/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-actions-terraform@charismatic-sum-485115-k9.iam.gserviceaccount.com
 
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v2
         with:
-          cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
-          location: ${{ secrets.GKE_CLUSTER_LOCATION }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          cluster_name: devops-final-gke
+          location: us-central1
+          project_id: charismatic-sum-485115-k9
 
       - name: Deploy to Kubernetes
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy != 'false' || github.event_name == 'push' }}
