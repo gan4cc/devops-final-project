@@ -34,4 +34,4 @@ spec:
             
           env:         
             - name: GCS_BUCKET
-              value: devops-final-project-uploads-bd5be
+              value: swagger-uploads
