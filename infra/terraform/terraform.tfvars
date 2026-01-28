@@ -1,3 +1,5 @@
-project_id  = "charismatic-sum-485115-k9"
-bucket_name = "terraform-state-devops-final-bucket-v"
-region      = "us-central1"
+project_id   = "charismatic-sum-485115-k9"
+region       = "us-central1"
+cluster_name = "devops-final-gke"
+namespace    = "default"
+bucket_name  = "terraform-state-devops-final-bucket-v"

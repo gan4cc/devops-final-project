@@ -14,7 +14,7 @@ resource "google_storage_bucket" "uploads" {
   }
 }
 resource "google_storage_bucket_iam_member" "backend_storage_viewer" {
-  bucket = "swagger-uploads" 
+  bucket = "swagger-uploads"
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:backend-gcs-sa@charismatic-sum-485115-k9.iam.gserviceaccount.com"
 }
