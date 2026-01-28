@@ -20,6 +20,8 @@
 ## Autentification GCP
 •	gcloud auth application-default login
 •	gcloud auth list
+•	gcloud config set project <PROJECT_ID>
+    
 
 ## Terraform
 •	cd infra/terraform

@@ -1,4 +1,8 @@
 name: Backend CI
+env:
+  GKE_CLUSTER: devops-final-gke
+  GKE_REGION: us-central1
+  GCP_PROJECT: charismatic-sum-485115-k9
 
 on:
   push:
@@ -99,9 +103,9 @@ jobs:
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v2
         with:
-          cluster_name: devops-final-gke
-          location: us-central1
-          project_id: charismatic-sum-485115-k9
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_REGION }}
+          project_id: ${{ env.GCP_PROJECT }}
 
       - name: Deploy to Kubernetes
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy != 'false' || github.event_name == 'push' }}
