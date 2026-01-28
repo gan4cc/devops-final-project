@@ -1,38 +1,87 @@
 # Application Verification Guide
 
-1. Check pod status
-```
+This document describes the steps required to verify that the application,
+infrastructure, CI/CD pipelines, and monitoring stack are working correctly.
+
+---
+
+## 1. Application Verification
+
+### Verify that pods are running
+```bash
 kubectl get pods
 ```
 
-2. Verify the health endpoint
-```
+---
+
+### Verify application health endpoint
+```bash
 kubectl port-forward svc/backend 8000:8000
+```
+
+Open in browser:
 http://localhost:8000/health
+
+---
+
+### Verify API via Swagger UI
+Open Swagger UI and test available API endpoints.
+
+---
+
+## 2. Kubernetes Verification
+
+### Check deployments and services
+```bash
+kubectl get deployments
+kubectl get services
 ```
 
-3. Open Swagger UI
-```
-http://localhost:8000/docs
-- Verify file upload to a specific folder
-- Verify listing files and folders
-- Verify file deletion
-- Verify moving files between folders
+---
+
+### Verify application logs
+```bash
+kubectl logs <pod-name>
 ```
 
-4. Verify monitoring
+---
+
+## 3. CI Verification
+
+- Open GitHub Actions
+- Verify successful execution of:
+  - Backend CI pipeline
+  - Terraform CI pipeline
+- Ensure all pipeline steps completed without errors
+
+---
+
+## 4. Monitoring Verification
+
+### Access Grafana
+```bash
+kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80
 ```
-- Open Grafana 
-- kubectl port-forward svc/monitoring-grafana \-n monitoring 3000:80
-login: admin
-Password:
+
+### Get Grafana admin password
+```bash
 kubectl get secret monitoring-grafana -n monitoring \
   -o jsonpath="{.data.admin-password}" | base64 --decode
+```
 
-http://localhost:3000/
+Open in browser:
+http://localhost:3000
 
-- Check Kubernetes dashboards:
-  Kubernetes / Compute Resources / Pod
-  Kubernetes / Compute Resources / Node (Pods)
-  Kubernetes / Networking / Pod
-etc.
+### Verify dashboards
+- Kubernetes / Compute Resources / Pod
+- Kubernetes / Compute Resources / Node (Pods)
+- Kubernetes / Networking / Pod
+
+---
+
+## Verification Summary
+
+- Application is running and responding correctly
+- Kubernetes resources are healthy
+- CI pipelines complete successfully
+- Monitoring stack is operational

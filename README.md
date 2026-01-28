@@ -55,7 +55,7 @@ CI is fully automated using **GitHub Actions**.
 Before building and deploying the application, the pipeline performs the following validation steps:
 
 - Python code linting using flake8
-- Dependency validation during depenci installation
+- Dependency validation during dependency installation
 - Dockerfile best practices check Hadolint
 - Container vulnerability scanning using Trivy (non-blocking, informational)
 

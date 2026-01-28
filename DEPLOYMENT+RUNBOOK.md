@@ -24,10 +24,15 @@
     
 
 ## Terraform
+Terraform apply is executed via GitHub Actions only.
+
+The initial infrastructure provisioning is performed by the Terraform CI pipeline
+on the first run after merging Terraform code to the main branch.
+
+Local usage:
 •	cd infra/terraform
 •	terraform init
 •	terraform plan
-•	terraform apply
 
 ## Connection to  GKE
 •	gcloud container clusters get-credentials devops-final-gke --region us-central1 --project PROJECT_ID
