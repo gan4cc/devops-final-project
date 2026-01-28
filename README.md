@@ -5,7 +5,7 @@
 This project is a **training DevOps project** that demonstrates the full lifecycle of a modern web application:
 from development and containerization to Kubernetes deployment, monitoring, and infrastructure management.
 
-The project is built using **open-source and cloud technologies** and closely follows real-world DevOps practices.
+The project is built using **open-source and cloud technologies** and closely follows real-world DevOps practices, including Infrastructure as Code and CI/CD automation.
 
 ---
 
@@ -23,7 +23,7 @@ The project is built using **open-source and cloud technologies** and closely fo
 ## 🧩 Project Architecture
 
 ### Backend
-- **FastAPI (Python)**
+- FastAPI (Python)
 - REST API
 - Health checks (`/health`)
 - File uploads to object storage
@@ -37,6 +37,7 @@ The project is built using **open-source and cloud technologies** and closely fo
 - Helm charts
 - Deployment + Service
 - Liveness / Readiness probes
+- Rolling updates
 
 ### Cloud
 - Google Cloud Platform
@@ -63,6 +64,7 @@ After successful validation, the pipeline:
 - is triggered only when backend-related files change
 - builds a Docker image for the backend service
 - publishes the image to GitHub Container Registry (GHCR)
+- deploys the application to Kubernetes using Helm
 
 Manual pipeline execution is also supported via `workflow_dispatch`.
 
@@ -72,35 +74,55 @@ Manual pipeline execution is also supported via `workflow_dispatch`.
 
 The project uses **controlled (manual) Continuous Delivery**.
 
-- deployment is done using **Helm**
-- the application is deployed to Kubernetes
+- application deployment is performed using **Helm**
+- deployment is executed from GitHub Actions
 - Kubernetes performs rolling updates
 - application health is monitored using liveness and readiness probes
-- rollback is supported through Kubernetes and Helm mechanisms
+- rollback is supported via Helm and Kubernetes mechanisms
 
-Automatic deployment from GitHub Actions is **intentionally not enabled**
-due to cloud security limitations and to maintain release control.
+Deployment is automated but remains controlled through CI/CD pipelines.
 
 ---
 
 ## 🏗 Infrastructure as Code
 
-Infrastructure is managed using **Terraform**:
+Infrastructure is managed using **Terraform**.
 
-- Kubernetes cluster provisioning
-- Service Accounts management
-- IAM permissions
+Terraform is responsible for:
+- Google Kubernetes Engine (GKE) cluster provisioning
+- Node pool management
+- Service Accounts and IAM permissions
+- Workload Identity configuration
 - Cloud resource configuration
 
 ---
 
+## Terraform CI/CD
+
+Infrastructure changes are handled via a dedicated **Terraform CI pipeline**:
+- terraform init
+- terraform fmt
+- terraform validate
+- terraform plan
+
+terraform apply is executed only in GitHub Actions
+and only after merge to the main branch.
+
+Local usage is limited to terraform init and terraform plan.
+Local terraform apply is intentionally disabled by process.
+
+Terraform state is stored remotely in Google Cloud Storage.
+
+
 ## 🔐 Secrets and Security
 
-- secrets are not stored in the codebase
-- the following are used:
+- Secrets are not stored in the codebase
+- The following are used:
   - GitHub Secrets
   - Kubernetes Secrets
-- role-based access control is applied
+- Authentication to Google Cloud from CI/CD uses Workload Identity
+- No static JSON service account keys are used
+- Role-based access control (RBAC) is applied
 
 ---
 
@@ -109,49 +131,65 @@ Infrastructure is managed using **Terraform**:
 - **Prometheus** — Kubernetes metrics collection
 - **Grafana** — dashboards and visualization
 - Kubernetes health checks
+- Application-level health endpoint
 
 ---
 
 ## 📁 Project Structure
 
 DEVOPS_FINAL_PROJECT/
+│
+├── .github/
+│   └── workflows/
+│       ├── backend-ci.yml          # CI/CD для backend (build, scan, deploy)
+│       └── terraform-ci.yml        # CI/CD для Terraform (init, plan, apply)
+│
 ├── backend/
 │   ├── app/
-│   │   ├── main.py
-│   │   ├── health.py
-│   │   └── ...
-│   ├── Dockerfile
-│   └── requirements.txt
+│   │   ├── main.py                 # FastAPI application
+│   │   ├── health.py               # Health endpoint
+│   │   └── __pycache__/             # (gitignored)
+│   │
+│   ├── Dockerfile                  # Backend Docker image
+│   └── requirements.txt            # Python dependencies
+│
+├── infra/
+│   └── terraform/
+│       ├── apis.tf                 # Enable required GCP APIs
+│       ├── backend.tf              # Terraform backend (GCS state)
+│       ├── gke.tf                  # GKE cluster definition
+│       ├── node_pool.tf            # GKE node pool
+│       ├── iam.tf                  # IAM roles and bindings
+│       ├── ksa.tf                  # Kubernetes Service Account + WI
+│       ├── provider.tf             # Terraform providers
+│       ├── variables.tf            # Variable definitions
+│       ├── terraform.tfvars        # Environment values
+│       ├── locals.tf               # Reusable local values
+│       ├── outputs.tf              # Outputs for CI/debug
+│       ├── main.tf                 # Root module
+│       ├── .terraform.lock.hcl     # Provider lock file
+│       └── .terraform/             # Terraform cache (gitignored)
 │
 ├── k8s/
 │   └── helm/
 │       └── backend/
-│
-├── infra/
-│   └── terraform/
-│       ├── main.tf
-│       ├── gke.tf
-│       ├── iam.tf
-│       ├── ksa.tf
-│       ├── variables.tf
-│       ├── terraform.tfvars
-│       └── outputs.tf
+│           ├── Chart.yaml          # Helm chart metadata
+│           ├── values.yaml         # Helm values
+│           └── templates/
+│               ├── deployment.yaml
+│               ├── service.yaml
 │
 ├── docs/
-│   ├── pictures/
-│   │   ├── architecture.png
-│   │   ├── cicd.png
-│   │   └── monitoring.png
-│   └── diagrams.md (опционально)
+│   └── images/
+│       ├── architecture.png
+│       ├── cicd.png
+│       └── monitoring.png
 │
-├── .github/
-│   └── workflows/
-│       └── backend-ci.yml
+├── ARCHITECTURE.md                 # Architecture description
+├── DEPLOYMENT+RUNBOOK.md            # Deployment & operations guide
+├── VERIFICATION.md                  # Verification steps
+├── README.md                        # Project overview
 │
-├── ARCHITECTURE.md
-├── DEPLOYMENT+RUNBOOK.md
-├── VERIFICATION.md
-├── README.md
 ├── .gitignore
 └── LICENSE.txt
 
@@ -159,7 +197,11 @@ DEVOPS_FINAL_PROJECT/
 
 ## ✅ Summary
 
-This project implements a **complete DevOps pipeline** with automated CI,
-controlled CD, Kubernetes deployment, cloud infrastructure, and monitoring.
+This project implements a complete **DevOps lifecycle**:
+- Infrastructure as Code with Terraform
+- Automated CI and controlled CD
+- Kubernetes-based deployment
+- Secure authentication using Workload Identity
+- Monitoring and observability
 
-The project is ready for presentation and further development.
+The project follows production-oriented DevOps practices and is ready for presentation and further development.
