@@ -1,9 +1,4 @@
 name: Backend CI
-env:
-  GKE_CLUSTER: devops-final-gke
-  GKE_REGION: us-central1
-  GCP_PROJECT: charismatic-sum-485115-k9
-
 on:
   push:
     branches:
@@ -103,11 +98,11 @@ jobs:
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v2
         with:
-          cluster_name: ${{ env.GKE_CLUSTER }}
-          location: ${{ env.GKE_REGION }}
-          project_id: ${{ env.GCP_PROJECT }}
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_REGION }}
+          project_id: ${{ secrets.GCP_PROJECT }}
 
       - name: Deploy to Kubernetes
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.deploy != 'false' || github.event_name == 'push' }}
         run: |
-          helm upgrade --install backend ./k8s/helm/backend
+          helm upgrade --install backend ./k8s/helm/backend --set image.tag=${{ github.run_number }}

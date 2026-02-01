@@ -24,3 +24,8 @@ variable "bucket_name" {
   description = "GCS bucket name for Terraform state"
   type        = string
 }
+
+variable "uploads_bucket_name" {
+  description = "GCS bucket for backend uploads"
+  type        = string
+}
