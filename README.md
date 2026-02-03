@@ -180,9 +180,9 @@ DEVOPS_FINAL_PROJECT/
 │
 ├── docs/
 │   ├── images/
-│   │   ├── architecture.png        # Architecture diagram
-│   │   ├── cicd.png                # CI/CD flow
-│   │   └── monitoring.png          # Monitoring overview
+│   │   ├── 1.png        # Architecture diagram
+│   │   ├── 2.png                # CI/CD flow
+│   │   └── 3.png          # Monitoring overview
 │   │
 │   ├── ARCHITECTURE.md             # Architecture description
 │   ├── DEPLOYMENT+RUNBOOK.md       # Deployment & operations guide
