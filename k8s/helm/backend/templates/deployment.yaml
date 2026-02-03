@@ -12,7 +12,7 @@ spec:
       labels:
         app: backend
     spec:
-      serviceAccountName: backend-ksa
+      serviceAccountName: {{ .Values.servAcc.name }}
       containers:
         - name: backend
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -34,4 +34,4 @@ spec:
             
           env:         
             - name: GCS_BUCKET
-              value: swagger-uploads
+              value: {{ .Values.env.gcsBucket }}

@@ -1,3 +1,9 @@
+servAcc:
+  name: backend-ksa
+
+env:
+  gcsBucket: swagger-uploads
+
 image:
   repository: ghcr.io/gan4cc/devops-final-project/backend
   tag: latest
