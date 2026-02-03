@@ -138,17 +138,16 @@ Terraform state is stored remotely in Google Cloud Storage.
 ## 📁 Project Structure
 
 DEVOPS_FINAL_PROJECT/
-│
 ├── .github/
 │   └── workflows/
-│       ├── backend-ci.yml          # CI/CD для backend (build, scan, deploy)
-│       └── terraform-ci.yml        # CI/CD для Terraform (init, plan, apply)
+│       ├── backend-ci.yml          # Backend CI/CD (build, scan, deploy)
+│       └── terraform-ci.yml        # Terraform CI/CD (init, plan, apply)
 │
 ├── backend/
 │   ├── app/
 │   │   ├── main.py                 # FastAPI application
-│   │   ├── health.py               # Health endpoint
-│   │   └── __pycache__/             # (gitignored)
+│   │   ├── health.py               # /health endpoint
+│   │   └── __pycache__/            # (gitignored)
 │   │
 │   ├── Dockerfile                  # Backend Docker image
 │   └── requirements.txt            # Python dependencies
@@ -156,17 +155,17 @@ DEVOPS_FINAL_PROJECT/
 ├── infra/
 │   └── terraform/
 │       ├── apis.tf                 # Enable required GCP APIs
-│       ├── backend.tf              # Terraform backend (GCS state)
+│       ├── backend.tf              # Terraform backend (GCS remote state)
 │       ├── gke.tf                  # GKE cluster definition
 │       ├── node_pool.tf            # GKE node pool
-│       ├── iam.tf                  # IAM roles and bindings
-│       ├── ksa.tf                  # Kubernetes Service Account + WI
-│       ├── provider.tf             # Terraform providers
-│       ├── variables.tf            # Variable definitions
-│       ├── terraform.tfvars        # Environment values
+│       ├── iam.tf                  # IAM roles (GCP resources access)
+│       ├── ksa.tf                  # Kubernetes ServiceAccount + Workload Identity
+│       ├── provider.tf             # Terraform providers & versions
+│       ├── variables.tf            # Input variables
+│       ├── terraform.tfvars        # Environment-specific values
 │       ├── locals.tf               # Reusable local values
 │       ├── outputs.tf              # Outputs for CI/debug
-│       ├── main.tf                 # Root module
+│       ├── main.tf                 # Root Terraform module
 │       ├── .terraform.lock.hcl     # Provider lock file
 │       └── .terraform/             # Terraform cache (gitignored)
 │
@@ -176,20 +175,20 @@ DEVOPS_FINAL_PROJECT/
 │           ├── Chart.yaml          # Helm chart metadata
 │           ├── values.yaml         # Helm values
 │           └── templates/
-│               ├── deployment.yaml
-│               ├── service.yaml
+│               ├── deployment.yaml # Kubernetes Deployment
+│               └── service.yaml    # Kubernetes Service
 │
 ├── docs/
-│   └── images/
-│       ├── architecture.png
-│       ├── cicd.png
-│       └── monitoring.png
+│   ├── images/
+│   │   ├── architecture.png        # Architecture diagram
+│   │   ├── cicd.png                # CI/CD flow
+│   │   └── monitoring.png          # Monitoring overview
+│   │
+│   ├── ARCHITECTURE.md             # Architecture description
+│   ├── DEPLOYMENT+RUNBOOK.md       # Deployment & operations guide
+│   └── VERIFICATION.md             # Verification & validation steps
 │
-├── ARCHITECTURE.md                 # Architecture description
-├── DEPLOYMENT+RUNBOOK.md            # Deployment & operations guide
-├── VERIFICATION.md                  # Verification steps
-├── README.md                        # Project overview
-│
+├── README.md                       # Project overview
 ├── .gitignore
 └── LICENSE.txt
 
