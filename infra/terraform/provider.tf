@@ -13,3 +13,17 @@ provider "kubernetes" {
     google_container_cluster.primary.master_auth[0].cluster_ca_certificate
   )
 }
+terraform {
+  required_version = ">= 1.5"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.25"
+    }
+  }
+}
