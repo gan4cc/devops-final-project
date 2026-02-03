@@ -1,10 +1,4 @@
 name: Backend CI
-
-env:
-  GKE_CLUSTER: devops-final-gke
-  GKE_REGION: us-central1
-  GCP_PROJECT: charismatic-sum-485115-k9
-
 on:
   push:
     branches:
