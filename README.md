@@ -137,6 +137,7 @@ Terraform state is stored remotely in Google Cloud Storage.
 
 ## 📁 Project Structure
 
+```text
 DEVOPS_FINAL_PROJECT/
 ├── .github/
 │   └── workflows/
