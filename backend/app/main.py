@@ -1,3 +1,5 @@
+from fileinput import filename
+
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from app.health import router as health_router
 from google.cloud import storage
@@ -5,6 +7,7 @@ from typing import Optional
 import os
 from fastapi.responses import StreamingResponse
 from io import BytesIO
+import urllib.parse
 
 
 # =========================
@@ -253,11 +256,13 @@ def download_file(path: str):
 
         file_bytes = blob.download_as_bytes()
 
+        filename = os.path.basename(path)
+        encoded_filename = urllib.parse.quote(filename)
         return StreamingResponse(
             BytesIO(file_bytes),
-            media_type="application/octet-stream",
+            media_type=blob.content_type or "application/octet-stream",
             headers={
-                "Content-Disposition": f"attachment; filename={os.path.basename(path)}"
+                "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
             },
         )
 
