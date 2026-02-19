@@ -1,5 +1,3 @@
-from fileinput import filename
-
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from app.health import router as health_router
 from google.cloud import storage
@@ -243,6 +241,11 @@ def move_file(
 # Download file
 # =========================
 
+from fastapi.responses import StreamingResponse
+from io import BytesIO
+import urllib.parse
+
+
 @app.get("/files/download")
 def download_file(path: str):
     """
@@ -258,6 +261,7 @@ def download_file(path: str):
 
         filename = os.path.basename(path)
         encoded_filename = urllib.parse.quote(filename)
+
         return StreamingResponse(
             BytesIO(file_bytes),
             media_type=blob.content_type or "application/octet-stream",
@@ -268,3 +272,4 @@ def download_file(path: str):
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
