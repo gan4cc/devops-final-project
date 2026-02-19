@@ -234,8 +234,8 @@ def move_file(
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-    
-    
+
+
 # =========================
 # Download file
 # =========================
@@ -263,4 +263,3 @@ def download_file(path: str):
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-
