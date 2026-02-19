@@ -241,11 +241,6 @@ def move_file(
 # Download file
 # =========================
 
-from fastapi.responses import StreamingResponse
-from io import BytesIO
-import urllib.parse
-
-
 @app.get("/files/download")
 def download_file(path: str):
     """
