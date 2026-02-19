@@ -3,6 +3,8 @@ from app.health import router as health_router
 from google.cloud import storage
 from typing import Optional
 import os
+from fastapi.responses import StreamingResponse
+from io import BytesIO
 
 
 # =========================
@@ -232,3 +234,31 @@ def move_file(
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+    # =========================
+# Download file
+# =========================
+
+@app.get("/files/download")
+def download_file(path: str):
+    """
+    Downloads a file by its full path
+    """
+    try:
+        blob = bucket.blob(path)
+
+        if not blob.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+
+        file_bytes = blob.download_as_bytes()
+
+        return StreamingResponse(
+            BytesIO(file_bytes),
+            media_type="application/octet-stream",
+            headers={
+                "Content-Disposition": f"attachment; filename={os.path.basename(path)}"
+            },
+        )
+
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
